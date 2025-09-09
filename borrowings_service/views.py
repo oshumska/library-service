@@ -5,10 +5,8 @@ from borrowings_service.serializers import BorrowingSerializer
 
 
 class BorrowingsListRetrieveAPIView(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
-    queryset = Borrowing.objects.all()
+    queryset = Borrowing.objects.select_related("book", "user")
     serializer_class = BorrowingSerializer
     permission_classes = (permissions.IsAuthenticated,)
