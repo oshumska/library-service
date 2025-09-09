@@ -1,5 +1,4 @@
 .idea
 .venv
-library_service/__pycache__/
-__pycache__
 db.sqlite3
+__pycache__
