@@ -95,3 +95,33 @@ class PublicUserServiceTests(TestCase):
     def test_user_me_unauthorized(self):
         res = self.client.get(USER_ME_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserServiceTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = sample_user(email="user@gmail.com", password="<PASSWORD>")
+        self.client.force_authenticate(user=self.user)
+
+    def test_user_me_success(self):
+        res = self.client.get(USER_ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["id"], self.user.id)
+        self.assertEqual(res.data["email"], self.user.email)
+        self.assertEqual(res.data["is_staff"], self.user.is_staff)
+
+    def test_update_profile(self):
+        payload = {
+            "email": "new@gmail.com",
+            "first_name": "Lucy",
+            "last_name": "Smith",
+            "password": "newpassword",
+        }
+        res = self.client.patch(USER_ME_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["email"], self.user.email)
+        self.assertEqual(res.data["first_name"], self.user.first_name)
+        self.assertEqual(res.data["last_name"], self.user.last_name)
+        self.assertTrue(self.user.check_password(payload["password"]))
