@@ -10,14 +10,10 @@ class Borrowing(models.Model):
     expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
     book = models.ForeignKey(
-        Book,
-        on_delete=models.CASCADE,
-        related_name="book_borrowings"
+        Book, on_delete=models.CASCADE, related_name="book_borrowings"
     )
     user = models.ForeignKey(
-        get_user_model(),
-        on_delete=models.CASCADE,
-        related_name="user_borrowings"
+        get_user_model(), on_delete=models.CASCADE, related_name="user_borrowings"
     )
 
     @staticmethod
@@ -52,3 +48,6 @@ class Borrowing(models.Model):
 
     def __str__(self):
         return f"From: {self.borrow_date} to {self.expected_return_date}"
+
+    class Meta:
+        ordering = ["actual_return_date", "-expected_return_date"]
