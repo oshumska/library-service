@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
@@ -27,7 +28,7 @@ def sample_book(**params):
     return Book.objects.create(**defaults)
 
 
-class BookAPITestClass(TestCase):
+class PublicBookAPITest(TestCase):
 
     def setUp(self):
         self.client = APIClient()
@@ -39,6 +40,103 @@ class BookAPITestClass(TestCase):
         res = self.client.get(BOOK_LIST_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_book_forbidden(self):
+        payload = {
+            "title": "New Book",
+            "author": "Tiffany Smith",
+            "cover": "HARD",
+            "inventory": 15,
+            "daily_fee": 1,
+        }
+        res = self.client.post(BOOK_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_detail_book(self):
+        url = detail_url(self.book.id)
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["title"], self.book.title)
+        self.assertEqual(res.data["author"], self.book.author)
+        self.assertEqual(res.data["cover"], self.book.cover)
+        self.assertEqual(res.data["inventory"], self.book.inventory)
+        daily_fee = str(
+            Decimal(str(self.book.daily_fee)).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+        )
+        self.assertEqual(res.data["daily_fee"], daily_fee)
+
+    def test_update_book_forbidden(self):
+        url = detail_url(self.book.id)
+        payload = {
+            "title": "New Book",
+            "author": "Tiffany Smith",
+            "cover": "HARD",
+            "inventory": 15,
+            "daily_fee": 1,
+        }
+        res = self.client.put(url, payload)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_book_forbidden(self):
+        url = detail_url(self.book.id)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateBookApiTest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="user@ gmail.com",
+            password="<PASSWORD>",
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_create_book_forbidden(self):
+        payload = {
+            "title": "New Book",
+            "author": "Tiffany Smith",
+            "cover": "HARD",
+            "inventory": 15,
+            "daily_fee": 1,
+        }
+        res = self.client.post(BOOK_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_update_book_forbidden(self):
+        book = sample_book()
+        url = detail_url(book.id)
+        payload = {
+            "title": "New Book",
+            "author": "Tiffany Smith",
+            "cover": "HARD",
+            "inventory": 15,
+            "daily_fee": 1,
+        }
+        res = self.client.put(url, payload)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_book_forbidden(self):
+        book = sample_book()
+        url = detail_url(book.id)
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class AdminBookApiTest(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="admin@gmail.com",
+            password="password1",
+            is_staff=True,
+        )
+        self.client.force_authenticate(self.user)
+        self.book = sample_book()
 
     def test_create_book(self):
         payload = {
@@ -68,21 +166,6 @@ class BookAPITestClass(TestCase):
         }
         res = self.client.post(BOOK_LIST_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_detail_book(self):
-        url = detail_url(self.book.id)
-        res = self.client.get(url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data["title"], self.book.title)
-        self.assertEqual(res.data["author"], self.book.author)
-        self.assertEqual(res.data["cover"], self.book.cover)
-        self.assertEqual(res.data["inventory"], self.book.inventory)
-        daily_fee = str(
-            Decimal(str(self.book.daily_fee)).quantize(
-                Decimal("0.01"), rounding=ROUND_HALF_UP
-            )
-        )
-        self.assertEqual(res.data["daily_fee"], daily_fee)
 
     def test_update_book(self):
         payload = {
