@@ -1,6 +1,7 @@
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
+from decimal import Decimal, ROUND_HALF_UP
 
 from rest_framework.test import APIClient
 
@@ -76,7 +77,12 @@ class BookAPITestClass(TestCase):
         self.assertEqual(res.data["author"], self.book.author)
         self.assertEqual(res.data["cover"], self.book.cover)
         self.assertEqual(res.data["inventory"], self.book.inventory)
-        self.assertEqual(res.data["daily_fee"], self.book.daily_fee)
+        daily_fee = str(
+            Decimal(str(self.book.daily_fee)).quantize(
+                Decimal("0.00"), rounding=ROUND_HALF_UP
+            )
+        )
+        self.assertEqual(res.data["daily_fee"], daily_fee)
 
     def test_update_book(self):
         payload = {
