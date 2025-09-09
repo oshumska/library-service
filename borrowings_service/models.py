@@ -9,11 +9,13 @@ class Borrowing(models.Model):
     borrow_date = models.DateField()
     expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="book_borrowings")
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="user_borrowings")
 
     @staticmethod
-    def validate_borrowing(borrow_date, return_date, error_to_raise, actual_return_date=None):
+    def validate_borrowing(
+        borrow_date, return_date, error_to_raise, actual_return_date=None
+    ):
         if not (borrow_date and return_date and borrow_date < return_date):
             raise error_to_raise("borrow date must be before return date")
         if actual_return_date and actual_return_date < borrow_date:
@@ -24,7 +26,7 @@ class Borrowing(models.Model):
             self.borrow_date,
             self.expected_return_date,
             ValidationError,
-            self.actual_return_date
+            self.actual_return_date,
         )
 
     def save(
