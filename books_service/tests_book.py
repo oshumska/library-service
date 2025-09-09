@@ -79,7 +79,7 @@ class BookAPITestClass(TestCase):
         self.assertEqual(res.data["inventory"], self.book.inventory)
         daily_fee = str(
             Decimal(str(self.book.daily_fee)).quantize(
-                Decimal("0.00"), rounding=ROUND_HALF_UP
+                Decimal("0.01"), rounding=ROUND_HALF_UP
             )
         )
         self.assertEqual(res.data["daily_fee"], daily_fee)
