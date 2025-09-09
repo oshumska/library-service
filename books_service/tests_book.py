@@ -39,7 +39,34 @@ class PublicBookAPITest(TestCase):
         serializer = BookSerializer(books, many=True)
         res = self.client.get(BOOK_LIST_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data["results"], serializer.data)
+
+    def test_filter_book_by_title(self):
+        payload = {
+            "title": "Sample",
+        }
+        res = self.client.get(BOOK_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
+
+        payload = {"title": "wrong"}
+        res = self.client.get(BOOK_LIST_URL, payload)
+        self.assertEqual(res.data["count"], 0)
+
+    def test_filter_book_by_author(self):
+        payload = {
+            "author": "Tiffany",
+        }
+        res = self.client.get(BOOK_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
+
+        payload = {
+            "author": "test",
+        }
+        res = self.client.get(BOOK_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 0)
 
     def test_create_book_forbidden(self):
         payload = {
