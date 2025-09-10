@@ -50,4 +50,4 @@ class Borrowing(models.Model):
         return f"From: {self.borrow_date} to {self.expected_return_date}"
 
     class Meta:
-        ordering = ["actual_return_date", "-expected_return_date"]
+        ordering = ["actual_return_date", "expected_return_date"]
