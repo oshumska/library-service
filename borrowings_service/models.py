@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from rest_framework.exceptions import ValidationError
@@ -6,7 +8,7 @@ from books_service.models import Book
 
 
 class Borrowing(models.Model):
-    borrow_date = models.DateField()
+    borrow_date = models.DateField(auto_now_add=True)
     expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
     book = models.ForeignKey(
@@ -17,17 +19,15 @@ class Borrowing(models.Model):
     )
 
     @staticmethod
-    def validate_borrowing(
-        borrow_date, return_date, error_to_raise, actual_return_date=None
-    ):
-        if not (borrow_date and return_date and borrow_date < return_date):
+    def validate_borrowing(return_date, error_to_raise, actual_return_date=None):
+        borrow_date = datetime.date.today()
+        if not (return_date and borrow_date < return_date):
             raise error_to_raise("borrow date must be before return date")
         if actual_return_date and actual_return_date < borrow_date:
-            raise error_to_raise("actual return date must be before borrow date")
+            raise error_to_raise("actual return date must be after borrow date")
 
     def clean(self):
         self.validate_borrowing(
-            self.borrow_date,
             self.expected_return_date,
             ValidationError,
             self.actual_return_date,
