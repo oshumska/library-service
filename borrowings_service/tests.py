@@ -26,6 +26,14 @@ def sample_book(**params):
     return Book.objects.create(**defaults)
 
 
+def yesterday():
+    return datetime.date.today() - datetime.timedelta(days=1)
+
+
+def tomorrow():
+    return datetime.date.today() + datetime.timedelta(days=1)
+
+
 def sample_user(**params):
     return get_user_model().objects.create_user(**params)
 
@@ -83,9 +91,38 @@ class PrivateBorrowingTests(TestCase):
 
         res = self.client.get(BORROWING_LIST_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data["results"], serializer.data)
 
     def test_detail_borrowing(self):
         url = detail_url(self.borrowing.id)
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_create_borrowing(self):
+        book_inventory = self.book.inventory
+        payload = {
+            "expected_return_date": tomorrow(),
+            "book": self.book.id,
+        }
+        res = self.client.post(BORROWING_LIST_URL, payload)
+        book_inventory -= 1
+        self.book.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(book_inventory, self.book.inventory)
+
+    def test_create_borrowing_with_invalid_date(self):
+        payload = {
+            "expected_return_date": yesterday(),
+            "book": self.book.id,
+        }
+        res = self.client.post(BORROWING_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_borrowing_with_zero_book_inventory(self):
+        book = sample_book(inventory=0)
+        payload = {
+            "expected_return_date": tomorrow(),
+            "book": book.id,
+        }
+        res = self.client.post(BORROWING_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
