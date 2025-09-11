@@ -1,3 +1,5 @@
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins, permissions
 
 from borrowings_service.models import Borrowing
@@ -42,3 +44,22 @@ class BorrowingsAPIView(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "is_active",
+                type=OpenApiTypes.STR,
+                description="filter by active status "
+                "(ex. ?is_active=true or ?is_active=false)",
+            ),
+            OpenApiParameter(
+                "user_id",
+                type=OpenApiTypes.INT,
+                description="admin user can filter by user id (ex. ?user_id=1)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Gets list of borrowings"""
+        return super().list(request, *args, **kwargs)
