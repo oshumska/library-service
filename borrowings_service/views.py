@@ -28,9 +28,11 @@ class BorrowingsAPIView(
         elif is_active == "false":
             queryset = queryset.filter(actual_return_date__isnull=False)
 
-        if not self.request.user.is_staff:
+        if self.request.user.is_staff:
+            user_id = self.request.query_params.get("user_id")
+            return queryset.filter(user_id=user_id)
+        else:
             return queryset.filter(user=self.request.user)
-        return queryset
 
     def get_serializer_class(self):
         if self.action == "create":
