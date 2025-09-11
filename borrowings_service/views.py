@@ -25,14 +25,15 @@ class BorrowingsAPIView(
         is_active = self.request.query_params.get("is_active")
 
         if is_active == "true":
-            print("active")
             queryset = queryset.filter(actual_return_date__isnull=True)
         elif is_active == "false":
             queryset = queryset.filter(actual_return_date__isnull=False)
 
         if self.request.user.is_staff:
             user_id = self.request.query_params.get("user_id")
-            return queryset.filter(user_id=user_id)
+            if user_id:
+                return queryset.filter(user_id=user_id)
+            return queryset
         else:
             return queryset.filter(user=self.request.user)
 
