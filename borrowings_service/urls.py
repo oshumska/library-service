@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from borrowings_service.views import BorrowingsListRetrieveAPIView
+from borrowings_service.views import BorrowingsAPIView
 
 router = routers.DefaultRouter()
-router.register("", BorrowingsListRetrieveAPIView)
+router.register("", BorrowingsAPIView)
 
 urlpatterns = [
     path("", include(router.urls)),
