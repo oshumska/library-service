@@ -17,6 +17,12 @@ class BorrowingsAPIView(
     serializer_class = BorrowingSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
+    def get_queryset(self):
+        queryset = self.queryset
+        if not self.request.user.is_staff:
+            return queryset.filter(user=self.request.user)
+        return queryset
+
     def get_serializer_class(self):
         if self.action == "create":
             return CreateBorrowingSerializer
