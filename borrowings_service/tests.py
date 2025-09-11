@@ -52,8 +52,8 @@ class PublicBorrowingTests(TestCase):
             password="<PASSWORD>",
         )
         self.borrowing = Borrowing.objects.create(
-            borrow_date=datetime.date(2025, 9, 9),
-            expected_return_date=datetime.date(2025, 10, 10),
+            borrow_date=yesterday(),
+            expected_return_date=tomorrow() + datetime.timedelta(days=10),
             book=book,
             user=user,
         )
@@ -79,8 +79,8 @@ class PrivateBorrowingTests(TestCase):
         self.client.force_authenticate(user=self.user)
         self.book = sample_book()
         self.borrowing = Borrowing.objects.create(
-            borrow_date=datetime.date(2025, 9, 9),
-            expected_return_date=datetime.date(2025, 10, 10),
+            borrow_date=yesterday(),
+            expected_return_date=tomorrow() + datetime.timedelta(days=10),
             book=self.book,
             user=self.user,
         )
@@ -92,6 +92,37 @@ class PrivateBorrowingTests(TestCase):
         res = self.client.get(BORROWING_LIST_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data["results"], serializer.data)
+
+    def test_user_see_only_own_borrowings(self):
+        res = self.client.get(BORROWING_LIST_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
+        user = sample_user(
+            email="user2@gmail.com",
+            password="<PASSWORD>",
+        )
+        self.client.force_authenticate(user=user)
+        res = self.client.get(BORROWING_LIST_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 0)
+
+    def test_filter_by_is_active_borrowings(self):
+        payload = {
+            "is_active": "true",
+        }
+        res = self.client.get(BORROWING_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
+        self.borrowing.actual_return_date = tomorrow()
+        self.borrowing.save()
+        res = self.client.get(BORROWING_LIST_URL, payload)
+        self.assertEqual(res.data["count"], 0)
+        payload = {
+            "is_active": "false",
+        }
+        res = self.client.get(BORROWING_LIST_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
 
     def test_detail_borrowing(self):
         url = detail_url(self.borrowing.id)
@@ -126,3 +157,48 @@ class PrivateBorrowingTests(TestCase):
         }
         res = self.client.post(BORROWING_LIST_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class AdminBorrowingTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.admin = sample_user(
+            email="admin@gmail.com",
+            password="<PASSWORD>",
+            is_staff=True,
+        )
+        self.client.force_authenticate(user=self.admin)
+        self.user = sample_user(
+            email="user@gmail.com",
+            password="<PASSWORD>",
+        )
+        self.book = sample_book()
+        self.borrowing = Borrowing.objects.create(
+            borrow_date=yesterday(),
+            expected_return_date=tomorrow() + datetime.timedelta(days=10),
+            book=self.book,
+            user=self.user,
+        )
+
+    def test_admin_see_all_borrowings(self):
+        res = self.client.get(BORROWING_LIST_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
+
+    def test_filter_user_by_id(self):
+        Borrowing.objects.create(
+            borrow_date=yesterday(),
+            expected_return_date=tomorrow() + datetime.timedelta(days=10),
+            book=self.book,
+            user=self.admin,
+        )
+        res = self.client.get(BORROWING_LIST_URL)
+        self.assertEqual(res.data["count"], 2)
+
+        payload = {
+            "user_id": self.user.id,
+        }
+        res = self.client.get(BORROWING_LIST_URL, payload)
+        self.assertEqual(res.data["count"], 1)

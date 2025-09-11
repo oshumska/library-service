@@ -1,3 +1,5 @@
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets
 
 from books_service.models import Book
@@ -23,3 +25,23 @@ class BookViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(author__icontains=author)
 
         return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "title",
+                type=OpenApiTypes.STR,
+                description="filtering by title (ex. ?title=name)",
+                required=False,
+            ),
+            OpenApiParameter(
+                "author",
+                type=OpenApiTypes.STR,
+                description="filtering by author (ex. ?author=author)",
+                required=False,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Gets list of Books"""
+        return super().list(request, *args, **kwargs)
