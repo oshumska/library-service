@@ -57,7 +57,7 @@ class BorrowingsAPIView(
         if borrowing.user.id != self.request.user.id:
             return Response(
                 "User can only return their own borrowings",
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_405_METHOD_NOT_ALLOWED,
             )
         serializer = self.get_serializer(borrowing, data=request.data)
         if serializer.is_valid():
