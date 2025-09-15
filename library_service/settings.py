@@ -14,7 +14,10 @@ import os
 
 from datetime import timedelta
 from pathlib import Path
+
+from django.urls import reverse
 from dotenv import load_dotenv
+from django.core.signing import Signer
 
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,12 +28,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-#2rsi6a5j1vat)8eoz+god-zlv1rxoi5&kypq#)xsr1)z#t#9b"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["your-ngrok.app", "127.0.0.1"]
 
 
 # Application definition
@@ -153,3 +156,6 @@ SIMPLE_JWT = {
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 BASE_CHAT_ID = os.environ.get("BASE_CHAT_ID")
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/"
+BOT_USERNAME = os.environ.get("BOT_USERNAME")
+NGROK_URL = os.environ.get("NGROK_URL")
+signer = Signer()
