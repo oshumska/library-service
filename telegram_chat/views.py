@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, filters
@@ -15,6 +15,8 @@ from library_service.settings import (
     TELEGRAM_API_URL,
     BASE_CHAT_ID,
     NGROK_URL,
+    signer,
+    BOT_USERNAME,
 )
 from telegram_chat.bot import (
     application,
@@ -53,6 +55,24 @@ async def telegram_bot(request):
             return JsonResponse({"error": str(e)}, status=500)
     else:
         return JsonResponse("Bad Request", status=400)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_telegram_link(request):
+    user = request.user
+    signed_id = signer.sign(str(user.id))
+    # print(signed_id)
+    invite_link = application.bot.export_chat_invite_link(BASE_CHAT_ID)
+
+    url = f"https://t.me/{BOT_USERNAME}"
+    command = f"/start {signed_id}"
+    payload = {
+        "Library public chat link": invite_link,
+        "Bot link": url,
+        "Send command to private chat with bot to get personal notification": command,
+    }
+    return Response(payload, status.HTTP_200_OK)
 
 
 @api_view(["GET"])
