@@ -83,6 +83,14 @@ def setwebhook(request):
     ).json()
     return Response(response, status=status.HTTP_200_OK)
 
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def delete_webhook(request):
+    response = requests.post(
+        TELEGRAM_API_URL + "setWebhook?url=", timeout=5
+    ).json()
+    return Response(response, status=status.HTTP_200_OK)
+
 
 def send_message_to_chat(message: str):
     payload = {
