@@ -17,6 +17,7 @@ from library_service.settings import (
     NGROK_URL,
     signer,
     BOT_USERNAME,
+    BASE_CHAT_USERNAME,
 )
 from telegram_chat.bot import (
     application,
@@ -62,16 +63,16 @@ async def telegram_bot(request):
 def get_telegram_link(request):
     user = request.user
     signed_id = signer.sign(str(user.id))
-    invite_link = application.bot.export_chat_invite_link(BASE_CHAT_ID)
+    invite_link = f"https://t.me/{BASE_CHAT_USERNAME}"
 
     url = f"https://t.me/{BOT_USERNAME}"
     command = f"/start {signed_id}"
     payload = {
         "Library public chat link": invite_link,
         "Bot link": url,
-        "Send command to private chat with bot to get personal notification": command,
+        "Send command to private chat with bot to get  personal notification": command,
     }
-    return Response(payload, status.HTTP_200_OK)
+    return Response(data=payload, status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])
