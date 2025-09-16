@@ -62,7 +62,6 @@ async def telegram_bot(request):
 def get_telegram_link(request):
     user = request.user
     signed_id = signer.sign(str(user.id))
-    # print(signed_id)
     invite_link = application.bot.export_chat_invite_link(BASE_CHAT_ID)
 
     url = f"https://t.me/{BOT_USERNAME}"
@@ -78,7 +77,9 @@ def get_telegram_link(request):
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
 def setwebhook(request):
-    response = requests.post(TELEGRAM_API_URL + "setWebhook?url=" + NGROK_URL).json()
+    response = requests.post(
+        TELEGRAM_API_URL + "setWebhook?url=" + NGROK_URL, timeout=5
+    ).json()
     return Response(response, status=status.HTTP_200_OK)
 
 
@@ -89,7 +90,7 @@ def send_message_to_chat(message: str):
         "parse_mode": "HTML",
     }
 
-    requests.post(TELEGRAM_API_URL + "sendMessage", data=payload)
+    requests.post(TELEGRAM_API_URL + "sendMessage", data=payload, timeout=5)
 
 
 def send_private_message(message: str, chat_id: int):
@@ -99,4 +100,4 @@ def send_private_message(message: str, chat_id: int):
         "parse_mode": "HTML",
     }
 
-    requests.post(TELEGRAM_API_URL + "sendMessage", data=payload)
+    requests.post(TELEGRAM_API_URL + "sendMessage", data=payload, timeout=5)
