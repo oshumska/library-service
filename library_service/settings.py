@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["your-ngrok.app", "127.0.0.1"]
+ALLOWED_HOSTS = ["f5389634a109.ngrok-free.app", "127.0.0.1"]
 
 
 # Application definition
@@ -155,6 +155,7 @@ SIMPLE_JWT = {
 # telegram bot settings
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 BASE_CHAT_ID = os.environ.get("BASE_CHAT_ID")
+BASE_CHAT_USERNAME = os.environ.get("BASE_CHAT_USERNAME")
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/"
 BOT_USERNAME = os.environ.get("BOT_USERNAME")
 NGROK_URL = os.environ.get("NGROK_URL")
