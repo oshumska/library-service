@@ -1,10 +1,13 @@
 import json
+from unittest.mock import patch
 
 from django.test import TestCase
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
+from telegram import Update
 
 from library_service.settings import BASE_CHAT_ID
+from telegram_chat.bot import application
 from telegram_chat.views import send_message_to_chat, send_private_message
 
 GETPOST_URL = reverse("telegram-chat:telegram_bot")
@@ -30,8 +33,11 @@ class TelegramWebhookTest(TestCase):
             },
         }
 
-    def test_telegram_webhook_post(self):
-
+    @patch("telegram_chat.views.application.process_update")
+    @patch("telegram_chat.views.application.initialize")
+    def test_telegram_webhook_post(self, mock_initialize, mock_process_update):
+        expected_update = Update.de_json(self.mock_update, application.bot)
+        mock_process_update.return_value = expected_update
         res = self.client.post(
             GETPOST_URL,
             data=json.dumps(self.mock_update),
@@ -40,6 +46,8 @@ class TelegramWebhookTest(TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json(), {"ok": True})
+        mock_process_update.assert_awaited_once_with(expected_update)
+        mock_initialize.assert_awaited()
 
     def test_telegram_webhook_get(self):
 
