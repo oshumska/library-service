@@ -98,7 +98,8 @@ def send_message_to_chat(message: str):
         "parse_mode": "HTML",
     }
 
-    requests.post(TELEGRAM_API_URL + "sendMessage", data=payload, timeout=5)
+    res = requests.post(TELEGRAM_API_URL + "sendMessage", data=payload, timeout=5)
+    return res
 
 
 def send_private_message(message: str, chat_id: int):
@@ -108,4 +109,5 @@ def send_private_message(message: str, chat_id: int):
         "parse_mode": "HTML",
     }
 
-    requests.post(TELEGRAM_API_URL + "sendMessage", data=payload, timeout=5)
+    res = requests.post(TELEGRAM_API_URL + "sendMessage", data=payload, timeout=5)
+    return res
