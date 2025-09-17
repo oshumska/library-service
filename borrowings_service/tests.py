@@ -99,6 +99,8 @@ class PrivateBorrowingTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_borrowing(self):
+        """tests that authenticated user can create borrowing
+        !!!attention send actual message to your public chat"""
         book_inventory = self.book.inventory
         payload = {
             "expected_return_date": tomorrow(),
