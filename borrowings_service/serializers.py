@@ -56,7 +56,7 @@ class CreateBorrowingSerializer(serializers.ModelSerializer):
                 message = f"Have you already read {book.title} by {book.author}"
                 send_message_to_chat(message)
             user = validated_data.get("user")
-            if user.telegram.chat_id:
+            if hasattr(user, "telegram"):
                 return_date = validated_data.get("expected_return_date")
                 message = (
                     f"Congratulations you just borrowed {book.title} by {book.author},"
