@@ -55,7 +55,7 @@ async def telegram_bot(request):
             logger.exception("Webhook error")
             return JsonResponse({"error": str(e)}, status=500)
     else:
-        return JsonResponse("Bad Request", status=400)
+        return JsonResponse({"GET not allowed": "Bad Request"}, status=400)
 
 
 @api_view(["GET"])
