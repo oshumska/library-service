@@ -25,18 +25,23 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/users/", include("users_service.urls", namespace="users-service")),
-    path("api/books/", include("books_service.urls", "books-service")),
-    path("api/borrowings/", include("borrowings_service.urls", "borrowings-service")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    # Optional UI:
     path(
-        "api/schema/swagger/",
+        "api/library/users/", include("users_service.urls", namespace="users-service")
+    ),
+    path("api/library/books/", include("books_service.urls", "books-service")),
+    path(
+        "api/library/borrowings/",
+        include("borrowings_service.urls", "borrowings-service"),
+    ),
+    path("api/library/telegram/", include("telegram_chat.urls", namespace="telegram-chat")),
+    path("api/library/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/library/schema/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
     path(
-        "api/schema/redoc/",
+        "api/library/schema/redoc/",
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
