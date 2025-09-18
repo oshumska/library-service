@@ -158,6 +158,28 @@ class PrivateBorrowingTests(TestCase):
         res = self.client.post(BORROWING_LIST_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_return_borrowing(self):
+        """test check return book functionality settin actual_return_date and if
+        book inventory increase by 1"""
+        url = detail_url(self.borrowing.id)
+        inventory = self.book.inventory
+        res = self.client.post(f"{url}return/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.borrowing.refresh_from_db()
+        self.book.refresh_from_db()
+        self.assertEqual(self.borrowing.actual_return_date, datetime.date.today())
+        self.assertEqual(inventory + 1, self.book.inventory)
+
+    def test_return_borrowing_twice(self):
+        url = detail_url(self.borrowing.id)
+        self.client.post(f"{url}return/")
+        self.book.refresh_from_db()
+        inventory = self.book.inventory
+        res = self.client.post(f"{url}return/")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.book.refresh_from_db()
+        self.assertEqual(inventory, self.book.inventory)
+
 
 class AdminBorrowingTests(TestCase):
 
@@ -202,3 +224,8 @@ class AdminBorrowingTests(TestCase):
         }
         res = self.client.get(BORROWING_LIST_URL, payload)
         self.assertEqual(res.data["count"], 1)
+
+    def test_return_another_user_borrowing(self):
+        url = detail_url(self.borrowing.id)
+        res = self.client.get(f"{url}return/")
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
