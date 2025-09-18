@@ -175,3 +175,10 @@ TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/"
 BOT_USERNAME = os.environ.get("BOT_USERNAME")
 NGROK_URL = os.environ.get("NGROK_URL")
 signer = Signer()
+
+# celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_TIMEZONE = "Europe/Kyiv"
+CELERY_TASK_TRAK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
