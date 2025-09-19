@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "borrowings_service",
     "telegram_chat",
     "drf_spectacular",
+    "django_celery_beat",
 ]
 
 AUTH_USER_MODEL = "users_service.User"
