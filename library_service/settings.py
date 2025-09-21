@@ -33,7 +33,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["f5389634a109.ngrok-free.app", "127.0.0.1"]
+ALLOWED_HOSTS = ["your-ngrok-host", "127.0.0.1"]
 
 
 # Application definition
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "borrowings_service",
     "telegram_chat",
     "drf_spectacular",
+    "django_celery_beat",
 ]
 
 AUTH_USER_MODEL = "users_service.User"
@@ -131,7 +132,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -175,3 +177,10 @@ TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/"
 BOT_USERNAME = os.environ.get("BOT_USERNAME")
 NGROK_URL = os.environ.get("NGROK_URL")
 signer = Signer()
+
+# celery settings
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = "redis://localhost:6379"
+CELERY_TIMEZONE = "Europe/Kyiv"
+CELERY_TASK_TRAK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60

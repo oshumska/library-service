@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import (
@@ -33,7 +35,10 @@ urlpatterns = [
         "api/library/borrowings/",
         include("borrowings_service.urls", "borrowings-service"),
     ),
-    path("api/library/telegram/", include("telegram_chat.urls", namespace="telegram-chat")),
+    path(
+        "api/library/telegram/",
+        include("telegram_chat.urls", namespace="telegram-chat"),
+    ),
     path("api/library/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/library/schema/swagger/",
@@ -45,4 +50,4 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
