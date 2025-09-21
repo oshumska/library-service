@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "telegram_chat",
     "drf_spectacular",
     "django_celery_beat",
+    "payment_service",
 ]
 
 AUTH_USER_MODEL = "users_service.User"
