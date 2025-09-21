@@ -6,7 +6,7 @@ from payment_service.serializers import PaymentListSerializer, PaymentDetailSeri
 
 
 class PaymentViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.ModelViewSet
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     queryset = Payment.objects.select_related("borrowing")
     serializer_class = PaymentListSerializer
