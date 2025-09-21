@@ -4,7 +4,6 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from books_service.models import Book
 from borrowings_service.models import Borrowing
 from books_service.serializers import BookSerializer
 from telegram_chat.views import send_message_to_chat, send_private_message
