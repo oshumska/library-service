@@ -25,7 +25,7 @@ class PaymentViewSet(
             return queryset.filter(borrowing__user=self.request.user)
 
 
-def helper(borrowing: Borrowing) -> None:
+def helper(borrowing: Borrowing) -> Payment:
     try:
         product_name = f"Borrowed: {borrowing.book.title}"
         duration_of_borrowing = borrowing.expected_return_date - borrowing.borrow_date
@@ -46,7 +46,7 @@ def helper(borrowing: Borrowing) -> None:
             success_url="http://127.0.0.1:8000/api/library/payment/success/",
             cancel_url="http://127.0.0.1:8000/api/library/payment/cancel/",
         )
-        Payment.objects.create(
+        return Payment.objects.create(
             type="PAYMENT",
             borrowing=borrowing,
             session_url=session.url,
