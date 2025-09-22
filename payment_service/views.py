@@ -74,7 +74,7 @@ def helper(borrowing: Borrowing) -> None:
                     "price_data": {
                         "currency": "USD",
                         "product_data": {"name": product_name},
-                        "unit_amount": amount,
+                        "unit_amount": int(amount),
                     },
                     "quantity": 1,
                 }
