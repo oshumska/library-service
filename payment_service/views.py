@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from payment_service.models import Payment
 from borrowings_service.models import Borrowing
-from payment_service.serializers import PaymentListSerializer, PaymentDetailSerializer
+from payment_service.serializers import PaymentSerializer
 from library_service.settings import STRIPE_SECRET_KEY
 
 stripe.api_key = STRIPE_SECRET_KEY
@@ -15,7 +15,7 @@ class PaymentViewSet(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     queryset = Payment.objects.select_related("borrowing")
-    serializer_class = PaymentListSerializer
+    serializer_class = PaymentSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
@@ -25,12 +25,6 @@ class PaymentViewSet(
             return queryset
         else:
             return queryset.filter(borrowing__user=self.request.user)
-
-    def get_serializer_class(self):
-        if self.action == "retrieve":
-            return PaymentDetailSerializer
-
-        return PaymentListSerializer
 
 
 class CreateStripeSessionView(
