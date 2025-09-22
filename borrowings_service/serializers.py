@@ -13,7 +13,7 @@ from payment_service.serializers import PaymentSerializer
 
 class BorrowingSerializer(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
-    payments = PaymentSerializer(source="payments", many=True, read_only=True)
+    payments = PaymentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Borrowing
