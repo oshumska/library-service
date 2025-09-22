@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from payment_service.models import Payment
+from borrowings_service.models import Borrowing
 from payment_service.serializers import PaymentListSerializer, PaymentDetailSerializer
 from library_service.settings import STRIPE_SECRET_KEY
 
@@ -59,3 +60,23 @@ class CreateStripeSessionView(
             return Response(payload, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def helper(borrowing: Borrowing) -> stripe.checkout.Session:
+    product_name = f"Borrowed: {borrowing.book.title}"
+    session = stripe.checkout.Session.create(
+        line_items=[
+            {
+                "price_data": {
+                    "currency": "USD",
+                    "product_data": {"name": product_name},
+                    "unit_amount": 120,
+                },
+                "quantity": 1,
+            }
+        ],
+        mode="payment",
+        success_url="http://127.0.0.1:8000/api/library/payment/success/",
+        cancel_url="http://127.0.0.1:8000/api/library/payment/cancel/",
+    )
+    return session
