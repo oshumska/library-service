@@ -143,6 +143,20 @@ class PrivateBorrowingTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(book_inventory, self.book.inventory)
 
+    def test_created_property_have_payment(self):
+        """test that payment created with borrowing"""
+        payload = {
+            "expected_return_date": tomorrow(),
+            "book": self.book.id,
+        }
+        res = self.client.post(BORROWING_LIST_URL, payload)
+        borrowing = Borrowing.objects.get(id=res.data["id"])
+        payment = borrowing.payments.first()
+        self.assertTrue(payment)
+        self.assertNotEqual(payment.session_url, None)
+        self.assertNotEqual(payment.session_id, None)
+        self.assertEqual(self.book.daily_fee, payment.money_to_pay)
+
     def test_create_borrowing_with_invalid_date(self):
         payload = {
             "expected_return_date": yesterday(),
