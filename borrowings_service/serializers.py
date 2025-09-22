@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError
 from borrowings_service.models import Borrowing
 from books_service.serializers import BookSerializer
 from telegram_chat.views import send_message_to_chat, send_private_message
+from payment_service.views import helper
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
@@ -64,7 +65,9 @@ class CreateBorrowingSerializer(serializers.ModelSerializer):
                     f" make sure you finish reading by {return_date}"
                 )
                 send_private_message(message, chat_id=user.telegram.chat_id)
-            return Borrowing.objects.create(**validated_data)
+            borrowing = Borrowing.objects.create(**validated_data)
+            helper(borrowing)
+            return borrowing
 
     class Meta:
         model = Borrowing
