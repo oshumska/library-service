@@ -62,24 +62,33 @@ class CreateStripeSessionView(
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def helper(borrowing: Borrowing) -> stripe.checkout.Session:
-    product_name = f"Borrowed: {borrowing.book.title}"
-    duration_of_borrowing = borrowing.expected_return_date - borrowing.borrow_date
-    daily_fee = borrowing.book.daily_fee
-    amount = 100 * duration_of_borrowing.days * daily_fee
-    session = stripe.checkout.Session.create(
-        line_items=[
-            {
-                "price_data": {
-                    "currency": "USD",
-                    "product_data": {"name": product_name},
-                    "unit_amount": amount,
-                },
-                "quantity": 1,
-            }
-        ],
-        mode="payment",
-        success_url="http://127.0.0.1:8000/api/library/payment/success/",
-        cancel_url="http://127.0.0.1:8000/api/library/payment/cancel/",
-    )
-    return session
+def helper(borrowing: Borrowing) -> None:
+    try:
+        product_name = f"Borrowed: {borrowing.book.title}"
+        duration_of_borrowing = borrowing.expected_return_date - borrowing.borrow_date
+        daily_fee = borrowing.book.daily_fee
+        amount = 100 * duration_of_borrowing.days * daily_fee
+        session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "USD",
+                        "product_data": {"name": product_name},
+                        "unit_amount": amount,
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            success_url="http://127.0.0.1:8000/api/library/payment/success/",
+            cancel_url="http://127.0.0.1:8000/api/library/payment/cancel/",
+        )
+        Payment.objects.create(
+            type="PAYMENT",
+            borrowing=borrowing,
+            session_url=session.url,
+            session_id=session.id,
+            money_to_pay=amount / 100,
+        )
+    except Exception as e:
+        raise e
