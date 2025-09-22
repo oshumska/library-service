@@ -129,6 +129,11 @@ class PrivateBorrowingTests(TestCase):
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
+    def test_detail_borrowings_contain_payments(self):
+        url = detail_url(self.borrowing.id)
+        res = self.client.get(url)
+        self.assertIn("payments", res.data)
+
     def test_create_borrowing(self):
         """tests that authenticated user can create borrowing
         !!!attention send actual message to your public chat"""
