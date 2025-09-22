@@ -64,13 +64,16 @@ class CreateStripeSessionView(
 
 def helper(borrowing: Borrowing) -> stripe.checkout.Session:
     product_name = f"Borrowed: {borrowing.book.title}"
+    duration_of_borrowing = borrowing.expected_return_date - borrowing.borrow_date
+    daily_fee = borrowing.book.daily_fee
+    amount = 100 * duration_of_borrowing.days * daily_fee
     session = stripe.checkout.Session.create(
         line_items=[
             {
                 "price_data": {
                     "currency": "USD",
                     "product_data": {"name": product_name},
-                    "unit_amount": 120,
+                    "unit_amount": amount,
                 },
                 "quantity": 1,
             }
