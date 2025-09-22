@@ -8,10 +8,12 @@ from borrowings_service.models import Borrowing
 from books_service.serializers import BookSerializer
 from telegram_chat.views import send_message_to_chat, send_private_message
 from payment_service.views import helper
+from payment_service.serializers import PaymentSerializer
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
+    payment = PaymentSerializer(source="payments", many=True, read_only=True)
 
     class Meta:
         model = Borrowing
@@ -22,6 +24,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "actual_return_date",
             "book",
             "user",
+            "payment",
         )
 
 
