@@ -87,3 +87,39 @@ class PrivatePaymentTests(TestCase):
         url = detail_url(self.payment.id)
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+
+class AdminPaymentTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.book = sample_book()
+        self.admin = sample_user(
+            email="admin@gmail.com",
+            password="<PASSWORD>",
+            is_staff=True,
+        )
+        self.user = sample_user(
+            email="user@gmail.com",
+            password="<PASSWORD>",
+        )
+        self.client.force_authenticate(user=self.admin)
+        borrowing = sample_borrowing(self.book, self.user)
+        self.payment = helper(borrowing)
+
+    def test_admin_see_all_payments(self):
+        res = self.client.get(PAYMENT_LIST_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)
+
+    def test_admin_unable_create_payment(self):
+        res = self.client.post(PAYMENT_LIST_URL, {})
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_admin_unable_update_payment(self):
+        borrowing = sample_borrowing(self.book, self.admin)
+        payment = helper(borrowing)
+        url = detail_url(payment.id)
+        res = self.client.put(url, {})
+        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
