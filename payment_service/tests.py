@@ -7,6 +7,8 @@ from rest_framework.reverse import reverse
 
 from borrowings_service.tests import sample_user, sample_book, tomorrow, yesterday
 from borrowings_service.models import Borrowing
+from payment_service.models import Payment
+from payment_service.serializers import PaymentSerializer
 from payment_service.views import helper
 
 
@@ -46,3 +48,42 @@ class PublicPaymentTests(TestCase):
         url = detail_url(self.payment.id)
         res = self.client.get(url)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivatePaymentTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        book = sample_book()
+        self.user = sample_user(
+            email="user@gmail.com",
+            password="<PASSWORD>",
+        )
+        self.client.force_authenticate(user=self.user)
+        borrowing = sample_borrowing(book, self.user)
+        self.payment = helper(borrowing)
+
+    def test_list_payments(self):
+        payments = Payment.objects.all()
+        serializer = PaymentSerializer(payments, many=True)
+
+        res = self.client.get(PAYMENT_LIST_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["results"], serializer.data)
+
+    def test_user_see_only_own_payments(self):
+        res = self.client.get(PAYMENT_LIST_URL)
+        self.assertEqual(res.data["count"], 1)
+        user = sample_user(
+            email="user2@gmail.com",
+            password="<PASSWORD>",
+        )
+        self.client.force_authenticate(user=user)
+        res = self.client.get(PAYMENT_LIST_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 0)
+
+    def test_detail_payment(self):
+        url = detail_url(self.payment.id)
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
