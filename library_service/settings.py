@@ -185,3 +185,7 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379"
 CELERY_TIMEZONE = "Europe/Kyiv"
 CELERY_TASK_TRAK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# stripe settings
+
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")

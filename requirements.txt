@@ -10,3 +10,4 @@ drf-spectacular~=0.28.0
 celery~=5.5.3
 Redis
 django-celery-beat
+stripe~=12.5.1

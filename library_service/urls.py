@@ -40,7 +40,7 @@ urlpatterns = [
         include("telegram_chat.urls", namespace="telegram-chat"),
     ),
     path(
-        "api/library/payments/",
+        "api/library/",
         include("payment_service.urls", namespace="payment-service"),
     ),
     path("api/library/schema/", SpectacularAPIView.as_view(), name="schema"),

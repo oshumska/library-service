@@ -4,7 +4,7 @@ from rest_framework import routers
 from payment_service.views import PaymentViewSet
 
 router = routers.DefaultRouter()
-router.register("", PaymentViewSet)
+router.register("payments", PaymentViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
